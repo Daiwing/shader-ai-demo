@@ -1,0 +1,19 @@
+/* Hero layout: full-viewport stage with the "shaded" title centered above the canvas. */
+
+.app {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(3rem, 18vw, 14rem);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: lowercase;
+  color: var(--color-text);
+  text-shadow: 0 0 40px rgba(55, 198, 192, 0.35);
+}
