@@ -1,19 +1,21 @@
-/* Hero layout: full-viewport stage with the "shaded" title centered above the canvas. */
+/* Hero stage: full-viewport container with a cursor-following spotlight above the canvas. */
 
 .app {
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   min-height: 100vh;
 }
 
-.title {
-  margin: 0;
-  font-size: clamp(3rem, 18vw, 14rem);
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: lowercase;
-  color: var(--color-text);
-  text-shadow: 0 0 40px rgba(55, 198, 192, 0.35);
+/* Teal glow that follows the pointer and flares on click; sits between shader and content. */
+.app::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    260px circle at calc(var(--pointer-x, 0.5) * 100%) calc(var(--pointer-y, 0.5) * 100%),
+    hsl(var(--hue, 190) 80% 60% / calc(0.1 + 0.28 * var(--pulse, 0))),
+    transparent 68%
+  );
+  mix-blend-mode: screen;
 }

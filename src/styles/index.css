@@ -11,6 +11,12 @@
   --color-teal: #37c6c0;
   --color-blue: #3b7de0;
 
+  /* Live values written each frame by useReactiveCssVars. */
+  --pointer-x: 0.5;
+  --pointer-y: 0.5;
+  --pulse: 0;
+  --hue: 190;
+
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 

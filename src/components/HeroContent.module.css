@@ -1,1 +1,113 @@
-/* Styles for HeroContent; consumes --pointer-x/y, --pulse, --hue. Phase 5. */
+/* HeroContent: full-viewport layout whose accents track --pointer-*, --pulse, --hue. */
+
+.hero {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: clamp(1.25rem, 4vw, 2.5rem);
+}
+
+/* Top navigation */
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.brand {
+  font-size: 1rem;
+  letter-spacing: 0.28em;
+  text-transform: lowercase;
+  color: var(--color-text);
+  text-shadow: 0 0 calc(8px + 22px * var(--pulse, 0)) hsl(var(--hue, 190) 70% 60% / 0.7);
+}
+
+.links {
+  display: flex;
+  gap: clamp(1rem, 3vw, 2.25rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Links react to clicks (glow) and pointer position (hue). */
+
+.link {
+  color: var(--color-muted);
+  font-size: 0.95rem;
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  padding-bottom: 2px;
+  border-bottom: 1px solid transparent;
+  transition:
+    color 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.link:hover,
+.link:focus-visible {
+  color: hsl(var(--hue, 190) 80% 78%);
+  border-bottom-color: hsl(var(--hue, 190) 80% 60%);
+  outline: none;
+}
+
+/* Centered hero */
+
+.center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 1.25rem;
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(3.5rem, 20vw, 15rem);
+  font-weight: 600;
+  line-height: 0.9;
+  letter-spacing: 0.12em;
+  text-transform: lowercase;
+  color: hsl(var(--hue, 190) 55% 94%);
+  text-shadow: 0 0 calc(30px + 70px * var(--pulse, 0)) hsl(var(--hue, 190) 85% 60% / calc(0.3 + 0.5 * var(--pulse, 0)));
+}
+
+.tagline {
+  margin: 0;
+  font-size: clamp(0.95rem, 2.2vw, 1.25rem);
+  letter-spacing: 0.08em;
+  color: var(--color-muted);
+}
+
+.actions {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.action {
+  color: var(--color-text);
+  font-size: 0.95rem;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  padding: 0.55rem 1.1rem;
+  border: 1px solid hsl(var(--hue, 190) 60% 60% / 0.4);
+  border-radius: 999px;
+  background: hsl(var(--hue, 190) 60% 50% / calc(0.06 + 0.14 * var(--pulse, 0)));
+  transition:
+    border-color 0.25s ease,
+    background-color 0.25s ease;
+}
+
+.action:hover,
+.action:focus-visible {
+  border-color: hsl(var(--hue, 190) 80% 65%);
+  background: hsl(var(--hue, 190) 70% 50% / 0.22);
+  outline: none;
+}

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Renderer } from '../webgpu/renderer'
 import { WebGPUUnsupportedError } from '../webgpu/context'
 import { usePointerState } from './usePointerState'
+import { useReactiveCssVars } from './useReactiveCssVars'
 
 export type CanvasStatus = 'initializing' | 'running' | 'unsupported' | 'error'
 
@@ -11,6 +12,8 @@ export function useWebGPUCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const pointerRef = usePointerState(canvasRef)
   const [status, setStatus] = useState<CanvasStatus>('initializing')
+
+  useReactiveCssVars(pointerRef)
 
   useEffect(() => {
     const canvas = canvasRef.current

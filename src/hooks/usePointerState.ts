@@ -15,6 +15,8 @@ export class PointerState {
   velocityY = 0
   // Flat vec4 ring buffer (x, y, startTime, strength) consumed directly by the shader.
   readonly pulses = new Float32Array(PULSE_COUNT * PULSE_STRIDE)
+  // Increments on every click so DOM-side effects can detect new pulses without a clock.
+  pulseCount = 0
 
   private time = 0
   private lastX = OFFSCREEN
@@ -48,6 +50,7 @@ export class PointerState {
     this.pulses[base + 2] = this.time
     this.pulses[base + 3] = 1
     this.nextPulse = (this.nextPulse + 1) % PULSE_COUNT
+    this.pulseCount += 1
   }
 }
 
