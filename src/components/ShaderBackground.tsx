@@ -8,9 +8,21 @@ export function ShaderBackground() {
   const showFallback = status === 'unsupported' || status === 'error'
 
   return (
-    <div className={styles.root} aria-hidden="true">
-      <canvas ref={canvasRef} className={styles.canvas} />
-      {showFallback ? <div className={styles.fallback} /> : null}
+    <div className={styles.root}>
+      <canvas
+        ref={canvasRef}
+        className={styles.canvas}
+        aria-hidden="true"
+        hidden={showFallback}
+      />
+      {showFallback ? (
+        <div className={styles.fallback}>
+          <p className={styles.message}>
+            this demo needs WebGPU, which isn&apos;t available here. try a recent version of
+            Chrome or Edge to see the animated shader.
+          </p>
+        </div>
+      ) : null}
     </div>
   )
 }

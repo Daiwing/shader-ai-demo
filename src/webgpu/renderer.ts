@@ -7,15 +7,19 @@ import type { PointerState } from '../hooks/usePointerState'
 
 // Cap device-pixel-ratio so high-DPI displays don't render an oversized target.
 const MAX_PIXEL_RATIO = 2
+// Frozen timestamp used when the user prefers reduced motion, for a calm static field.
+const REDUCED_MOTION_TIME = 12
 
 export class Renderer {
   private readonly canvas: HTMLCanvasElement
   private readonly pointer: PointerState
+  private readonly zeroPulses: Float32Array
   private gpu: GpuContext | null = null
   private pipeline: GPURenderPipeline | null = null
   private uniforms: Uniforms | null = null
   private bindGroup: GPUBindGroup | null = null
   private resizeObserver: ResizeObserver | null = null
+  private reducedMotionQuery: MediaQueryList | null = null
   private rafId = 0
   private startTime = 0
   private disposed = false
@@ -23,6 +27,7 @@ export class Renderer {
   constructor(canvas: HTMLCanvasElement, pointer: PointerState) {
     this.canvas = canvas
     this.pointer = pointer
+    this.zeroPulses = new Float32Array(pointer.pulses.length)
   }
 
   async init(): Promise<void> {
@@ -49,13 +54,17 @@ export class Renderer {
 
     this.resizeObserver = new ResizeObserver(() => this.resize())
     this.resizeObserver.observe(this.canvas)
+    // Window resize also catches devicePixelRatio changes from browser zoom.
+    window.addEventListener('resize', this.resize)
     this.resize()
+
+    this.reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
 
     this.startTime = performance.now()
     this.rafId = requestAnimationFrame(this.loop)
   }
 
-  resize(): void {
+  resize = (): void => {
     const dpr = Math.min(window.devicePixelRatio || 1, MAX_PIXEL_RATIO)
     const width = Math.max(1, Math.floor(this.canvas.clientWidth * dpr))
     const height = Math.max(1, Math.floor(this.canvas.clientHeight * dpr))
@@ -74,16 +83,18 @@ export class Renderer {
     if (!this.gpu || !this.pipeline || !this.uniforms || !this.bindGroup) return
     const { device, context } = this.gpu
 
+    // Reduced motion: freeze the field and drop velocity/ripple animation.
+    const reduced = this.reducedMotionQuery?.matches ?? false
     this.pointer.update(time)
     this.uniforms.write(device, {
       width: this.canvas.width,
       height: this.canvas.height,
-      time,
+      time: reduced ? REDUCED_MOTION_TIME : time,
       pointerX: this.pointer.x,
       pointerY: this.pointer.y,
-      pointerVelocityX: this.pointer.velocityX,
-      pointerVelocityY: this.pointer.velocityY,
-      pulses: this.pointer.pulses,
+      pointerVelocityX: reduced ? 0 : this.pointer.velocityX,
+      pointerVelocityY: reduced ? 0 : this.pointer.velocityY,
+      pulses: reduced ? this.zeroPulses : this.pointer.pulses,
     })
 
     const encoder = device.createCommandEncoder()
@@ -109,6 +120,7 @@ export class Renderer {
     this.disposed = true
     cancelAnimationFrame(this.rafId)
     this.resizeObserver?.disconnect()
+    window.removeEventListener('resize', this.resize)
     this.gpu?.device.destroy()
     this.gpu = null
     this.pipeline = null
