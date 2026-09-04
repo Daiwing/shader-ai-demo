@@ -75,7 +75,8 @@
   letter-spacing: 0.12em;
   text-transform: lowercase;
   color: hsl(var(--hue, 190) 55% 94%);
-  text-shadow: 0 0 calc(30px + 70px * var(--pulse, 0)) hsl(var(--hue, 190) 85% 60% / calc(0.3 + 0.5 * var(--pulse, 0)));
+  text-shadow: 0 0 calc(30px + 70px * var(--pulse, 0))
+    hsl(var(--hue, 190) 85% 60% / calc(0.3 + 0.5 * var(--pulse, 0)));
 }
 
 .tagline {
