@@ -22,6 +22,7 @@ export interface UniformState {
   pointerY: number
   pointerVelocityX: number
   pointerVelocityY: number
+  pulses: Float32Array
 }
 
 export class Uniforms {
@@ -45,7 +46,7 @@ export class Uniforms {
     d[5] = state.pointerY
     d[6] = state.pointerVelocityX
     d[7] = state.pointerVelocityY
-    // Pulse slots (indices 8+) stay zeroed until Phase 4 populates them.
+    d.set(state.pulses, 8)
     device.queue.writeBuffer(this.buffer, 0, d)
   }
 }

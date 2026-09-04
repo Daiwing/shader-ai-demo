@@ -3,12 +3,14 @@
 import shaderSource from './shaders/fluidField.wgsl?raw'
 import { initWebGPU, type GpuContext } from './context'
 import { Uniforms } from './uniforms'
+import type { PointerState } from '../hooks/usePointerState'
 
 // Cap device-pixel-ratio so high-DPI displays don't render an oversized target.
 const MAX_PIXEL_RATIO = 2
 
 export class Renderer {
   private readonly canvas: HTMLCanvasElement
+  private readonly pointer: PointerState
   private gpu: GpuContext | null = null
   private pipeline: GPURenderPipeline | null = null
   private uniforms: Uniforms | null = null
@@ -18,8 +20,9 @@ export class Renderer {
   private startTime = 0
   private disposed = false
 
-  constructor(canvas: HTMLCanvasElement) {
+  constructor(canvas: HTMLCanvasElement, pointer: PointerState) {
     this.canvas = canvas
+    this.pointer = pointer
   }
 
   async init(): Promise<void> {
@@ -71,14 +74,16 @@ export class Renderer {
     if (!this.gpu || !this.pipeline || !this.uniforms || !this.bindGroup) return
     const { device, context } = this.gpu
 
+    this.pointer.update(time)
     this.uniforms.write(device, {
       width: this.canvas.width,
       height: this.canvas.height,
       time,
-      pointerX: 0,
-      pointerY: 0,
-      pointerVelocityX: 0,
-      pointerVelocityY: 0,
+      pointerX: this.pointer.x,
+      pointerY: this.pointer.y,
+      pointerVelocityX: this.pointer.velocityX,
+      pointerVelocityY: this.pointer.velocityY,
+      pulses: this.pointer.pulses,
     })
 
     const encoder = device.createCommandEncoder()

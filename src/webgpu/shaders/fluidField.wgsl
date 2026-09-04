@@ -69,14 +69,23 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4f {
   var p = input.uv;
   p.x = p.x * aspect;
 
+  var pointer = u.pointer;
+  pointer.x = pointer.x * aspect;
+
   let t = u.time * 0.08;
+
+  // Pointer drag: displace the domain near the cursor along its motion.
+  let toPointer = p - pointer;
+  let pointerFalloff = exp(-dot(toPointer, toPointer) * 30.0);
+  let drag = u.pointerVelocity * pointerFalloff * 0.6;
+  let sample = (p + drag) * 3.0;
 
   // Domain warp: displace the sample point by a second noise field so the pattern flows.
   let warp = vec2f(
-    fbm(p * 3.0 + vec2f(0.0, t)),
-    fbm(p * 3.0 + vec2f(t, 1.7)),
+    fbm(sample + vec2f(0.0, t)),
+    fbm(sample + vec2f(t, 1.7)),
   );
-  let field = fbm(p * 3.0 + warp * 1.5 + vec2f(t * 0.5));
+  let field = fbm(sample + warp * 1.5 + vec2f(t * 0.5));
 
   // Blue/teal palette ramp driven by the field value.
   let deep = vec3f(0.02, 0.05, 0.11);
@@ -84,6 +93,29 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4f {
   let teal = vec3f(0.22, 0.72, 0.70);
   var color = mix(deep, blue, smoothstep(0.2, 0.6, field));
   color = mix(color, teal, smoothstep(0.55, 0.95, field));
+
+  // Soft teal halo tracking the cursor.
+  color += teal * pointerFalloff * 0.15;
+
+  // Expanding ripple rings spawned by clicks (age-based, no CPU-side removal).
+  let rippleColor = vec3f(0.55, 0.95, 0.95);
+  for (var i = 0u; i < 8u; i = i + 1u) {
+    let pulse = u.pulses[i];
+    if (pulse.w <= 0.0) {
+      continue;
+    }
+    let age = u.time - pulse.z;
+    if (age < 0.0 || age > 2.0) {
+      continue;
+    }
+    var center = pulse.xy;
+    center.x = center.x * aspect;
+    let radius = age * 0.5;
+    let ringDistance = abs(length(p - center) - radius);
+    let ring = smoothstep(0.035, 0.0, ringDistance);
+    let fade = 1.0 - age / 2.0;
+    color += rippleColor * ring * fade * pulse.w * 0.6;
+  }
 
   return vec4f(color, 1.0);
 }
